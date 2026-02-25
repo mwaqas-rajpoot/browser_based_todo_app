@@ -1,0 +1,339 @@
+openapi: 3.0.3
+info:
+  title: Todo Application API
+  description: API for managing todo tasks with user authentication
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+    description: Development server
+  - url: https://api.todoapp.com
+    description: Production server
+
+paths:
+  /auth/register:
+    post:
+      summary: Register a new user
+      description: Creates a new user account with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  minLength: 8
+                  example: securePassword123
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    example: 123e4567-e89b-12d3-a456-426614174000
+                  email:
+                    type: string
+                    format: email
+                    example: user@example.com
+                  created_at:
+                    type: string
+                    format: date-time
+                    example: "2026-02-04T10:00:00Z"
+        '400':
+          description: Invalid input data
+        '409':
+          description: Email already exists
+
+  /auth/login:
+    post:
+      summary: Authenticate user
+      description: Authenticates user with email and password, returns JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  example: securePassword123
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                  token_type:
+                    type: string
+                    example: bearer
+        '401':
+          description: Invalid credentials
+
+  /auth/logout:
+    post:
+      summary: Logout user
+      description: Invalidates the current session/token
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Successfully logged out
+
+  /tasks:
+    get:
+      summary: Get user's tasks
+      description: Retrieve all tasks belonging to the authenticated user
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of user's tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '401':
+          description: Unauthorized - invalid or missing token
+    post:
+      summary: Create a new task
+      description: Create a new task for the authenticated user
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCreateRequest'
+      responses:
+        '201':
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Invalid input data
+        '401':
+          description: Unauthorized - invalid or missing token
+
+  /tasks/{id}:
+    get:
+      summary: Get a specific task
+      description: Retrieve a specific task by ID if it belongs to the authenticated user
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Task ID
+      responses:
+        '200':
+          description: Task details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '401':
+          description: Unauthorized - invalid or missing token
+        '403':
+          description: Forbidden - task does not belong to user
+        '404':
+          description: Task not found
+    put:
+      summary: Update a task
+      description: Update an existing task if it belongs to the authenticated user
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Task ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskUpdateRequest'
+      responses:
+        '200':
+          description: Task updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Invalid input data
+        '401':
+          description: Unauthorized - invalid or missing token
+        '403':
+          description: Forbidden - task does not belong to user
+        '404':
+          description: Task not found
+    delete:
+      summary: Delete a task
+      description: Delete a task if it belongs to the authenticated user
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Task ID
+      responses:
+        '204':
+          description: Task deleted successfully
+        '401':
+          description: Unauthorized - invalid or missing token
+        '403':
+          description: Forbidden - task does not belong to user
+        '404':
+          description: Task not found
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - email
+        - created_at
+
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 1000
+          nullable: true
+        status:
+          type: string
+          enum: [todo, in_progress, completed]
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+        priority:
+          type: string
+          enum: [low, medium, high]
+        user_id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - status
+        - priority
+        - user_id
+        - created_at
+        - updated_at
+
+    TaskCreateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 1000
+        due_date:
+          type: string
+          format: date-time
+        priority:
+          type: string
+          enum: [low, medium, high]
+          default: medium
+      required:
+        - title
+
+    TaskUpdateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 1000
+        status:
+          type: string
+          enum: [todo, in_progress, completed]
+        due_date:
+          type: string
+          format: date-time
+        priority:
+          type: string
+          enum: [low, medium, high]

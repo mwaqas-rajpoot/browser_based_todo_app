@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test API Connection</title>
+</head>
+<body>
+    <h1>Testing Backend API Connection</h1>
+    <button onclick="testAPI()">Test Connection</button>
+    <pre id="result"></pre>
+
+    <script>
+        async function testAPI() {
+            const resultEl = document.getElementById('result');
+            resultEl.textContent = 'Testing...';
+            
+            try {
+                // Test 1: Basic health check
+                const response = await fetch('http://localhost:8000/health');
+                const data = await response.json();
+                resultEl.textContent = 'SUCCESS: ' + JSON.stringify(data, null, 2);
+                
+                // Test 2: Try registration endpoint
+                const regResponse = await fetch('http://localhost:8000/api/v1/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: 'testuser999',
+                        email: 'test999@gmail.com',
+                        password: 'Test123!'
+                    })
+                });
+                const regData = await regResponse.json();
+                resultEl.textContent += '\n\nRegistration: ' + JSON.stringify(regData, null, 2);
+            } catch (error) {
+                resultEl.textContent = 'ERROR: ' + error.message + '\n\nThis is likely a CORS or network issue.';
+            }
+        }
+    </script>
+</body>
+</html>

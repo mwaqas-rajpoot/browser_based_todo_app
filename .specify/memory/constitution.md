@@ -1,55 +1,58 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report:
+- Version change: N/A -> 1.0.0
+- Modified principles: N/A (new constitution)
+- Added sections: All principles and sections for Hackathon Todo project
+- Removed sections: None (new document)
+- Templates requiring updates: ✅ Updated
+- Follow-up TODOs: None
+-->
+# Hackathon Todo – Phase II (Full-Stack Web App) Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Monorepo Architecture
+Full-stack application developed in single repository with clear separation of concerns between frontend and backend services; Frontend and backend must be independently deployable while maintaining shared interfaces; Strict boundary enforcement between layers to prevent circular dependencies.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Spec-Driven Development
+All development work must be guided by formal specifications stored in /specs; No feature implementation without corresponding spec; Specs serve as source of truth and must be updated before implementation begins.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Authentication & User Isolation (NON-NEGOTIABLE)
+Every API endpoint requires JWT authentication using Better Auth; User identity must be verified server-side using BETTER_AUTH_SECRET; Users can only access their own data - no cross-user access allowed; Authentication headers validated on every request.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Security-First Approach
+No user_id trusted from frontend without JWT verification; Input validation required at all entry points; Sanitized outputs to prevent XSS; Parameterized queries to prevent SQL injection; Secure session management with proper token handling.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Full-Stack Integration
+Frontend (Next.js 16+, TypeScript, Tailwind) communicates with Backend (FastAPI + SQLModel) via secure API calls; Consistent data models across frontend and backend; Proper error handling and user feedback across both layers; Unified testing strategy covering full stack.
 
-### [PRINCIPLE_6_NAME]
+### VI. Type Safety & Modern Frameworks
+TypeScript used throughout for compile-time safety; Strict typing enforced for all API contracts; Next.js App Router leveraged for modern SSR/SSG patterns; Tailwind CSS for consistent styling; FastAPI for automatic API documentation and validation.
 
+## Technical Constraints
 
-[PRINCIPLE__DESCRIPTION]
+### Database & Persistence
+Neon Serverless PostgreSQL as primary data store; SQLModel for ORM and schema management; Proper indexing and query optimization; Database migrations managed through proper migration system; Connection pooling and resource management.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+### Authentication System
+Better Auth for JWT-based authentication; Shared BETTER_AUTH_SECRET between frontend and backend; Refresh token management; Proper session invalidation; Password security with bcrypt or similar.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### API Design Standards
+RESTful API design with proper HTTP status codes; JSON request/response format; Proper error messaging with status codes; Rate limiting where appropriate; Input validation and sanitization.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## Development Workflow
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+### Code Quality Standards
+TypeScript strict mode enabled; ESLint and Prettier for code formatting; Comprehensive unit and integration tests; Proper documentation for public APIs; Code reviews required for all PRs.
+
+### Security Practices
+Regular dependency vulnerability scanning; Secure credential management; No hardcoded secrets in code; Environment variables for configuration; Regular security audits.
+
+### Testing Requirements
+Unit tests for all business logic; Integration tests for API endpoints; End-to-end tests for critical user flows; Security-focused penetration testing; Performance testing for key operations.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+All code changes must comply with these constitutional principles; Amendments require explicit team consensus and documented approval; Pull requests rejected if not meeting constitutional standards; Code reviews must verify constitutional compliance; New features forbidden without proper spec alignment.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2026-02-04 | **Last Amended**: 2026-02-04
