@@ -110,9 +110,66 @@ This project transforms an existing console-based Todo app into a secure, multi-
 4. **Responsive UI**: Clean interface for task management
 5. **Security**: Server-side validation of all requests
 
+## Deployment
+
+### Vercel Deployment
+
+This project is deployed on Vercel with separate deployments for frontend and backend.
+
+#### Frontend Deployment
+Already deployed on Vercel. Update environment variable:
+- `NEXT_PUBLIC_API_URL` - Your backend Vercel URL
+
+#### Backend Deployment
+
+**Option 1: Using Vercel CLI**
+```bash
+cd backend
+vercel login
+vercel --prod
+```
+
+**Option 2: Using Vercel Dashboard**
+1. Import repository
+2. Set Root Directory to `backend`
+3. Add environment variables (see below)
+4. Deploy
+
+#### Required Environment Variables (Backend)
+
+Set these in Vercel Dashboard → Project Settings → Environment Variables:
+
+- `DATABASE_URL` - PostgreSQL connection string (NeonDB recommended)
+- `SECRET_KEY` - JWT secret key (min 32 characters)
+- `ALGORITHM` - `HS256`
+- `ACCESS_TOKEN_EXPIRE_MINUTES` - `30`
+- `ADMIN_TOKEN` - Admin API token
+- `ENVIRONMENT` - `production`
+- `FRONTEND_URL` - Your frontend Vercel URL
+
+#### Deployment Guide
+📘 [Complete Vercel Deployment Guide](./VERCEL_DEPLOYMENT_GUIDE.md)
+
 ## Development
 
 This project follows spec-driven development principles. All features are guided by specifications in the `/specs` directory.
 
+## Testing
+
+```bash
+# Backend tests
+cd backend
+pytest
+
+# Frontend tests
+cd frontend
+npm test
+```
+
+## Documentation
+
+- API Documentation: `http://localhost:8000/docs` (Swagger UI)
+- Project Status: [PROJECT_STATUS.md](./PROJECT_STATUS.md)
+- Troubleshooting: [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
 
 <!--Admin Login token: dev-admin-token-2026 -->
