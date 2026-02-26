@@ -56,11 +56,13 @@ def custom_openapi():
             "description": "Enter your JWT token from /api/v1/auth/login"
         }
     }
-    # Apply security globally to all endpoints
+    # Apply security to protected endpoints only (exclude public endpoints)
+    public_paths = ["/", "/health", "/api/v1/auth/register", "/api/v1/auth/login"]
     for path in openapi_schema["paths"]:
-        for method in openapi_schema["paths"][path]:
-            if method != "parameters":
-                openapi_schema["paths"][path][method]["security"] = [{"BearerAuth": []}]
+        if path not in public_paths:
+            for method in openapi_schema["paths"][path]:
+                if method != "parameters":
+                    openapi_schema["paths"][path][method]["security"] = [{"BearerAuth": []}]
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 
