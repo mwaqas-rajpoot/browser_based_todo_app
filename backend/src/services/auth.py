@@ -5,13 +5,34 @@ from ..auth.jwt_handler import create_access_token
 from datetime import timedelta
 from typing import Optional
 import uuid
+import re
 
-# Password hashing context - using argon2 as primary scheme for better compatibility
-pwd_context = CryptContext(schemes=["argon2", "bcrypt"], deprecated="auto")
+# Password hashing context - using bcrypt only for production
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class AuthService:
     """Service class for handling user authentication operations."""
+
+    @staticmethod
+    def validate_password_strength(password: str) -> tuple[bool, str]:
+        """
+        Validate password strength.
+
+        Returns:
+            Tuple of (is_valid, error_message)
+        """
+        if len(password) < 8:
+            return False, "Password must be at least 8 characters long"
+        if len(password) > 72:
+            return False, "Password cannot exceed 72 characters"
+        if not re.search(r"[A-Z]", password):
+            return False, "Password must contain at least one uppercase letter"
+        if not re.search(r"[a-z]", password):
+            return False, "Password must contain at least one lowercase letter"
+        if not re.search(r"\d", password):
+            return False, "Password must contain at least one number"
+        return True, ""
 
     @staticmethod
     def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -20,23 +41,8 @@ class AuthService:
 
     @staticmethod
     def get_password_hash(password: str) -> str:
-        """Generate a hash for a plain password."""
-        # Ensure password is within bcrypt's 72-byte limit
-        # Convert to bytes, truncate if needed, then decode back to string
-        password_bytes = password.encode('utf-8')
-        if len(password_bytes) > 72:
-            # Truncate to 72 bytes and decode back to string
-            password = password_bytes[:72].decode('utf-8', errors='ignore')
-
-        try:
-            return pwd_context.hash(password)
-        except ValueError as e:
-            if "password cannot be longer than 72 bytes" in str(e):
-                # Fallback: truncate to 72 characters (conservative approach)
-                truncated_password = password[:72]
-                return pwd_context.hash(truncated_password)
-            else:
-                raise e
+        """Generate a hash for a plain password using bcrypt."""
+        return pwd_context.hash(password)
 
     @staticmethod
     def authenticate_user(session: Session, email: str, password: str) -> Optional[User]:
@@ -72,7 +78,15 @@ class AuthService:
 
         Returns:
             Created User object if successful, None if email already exists
+
+        Raises:
+            ValueError: If password is weak or validation fails
         """
+        # Validate password strength
+        is_valid, error_msg = AuthService.validate_password_strength(user_register.password)
+        if not is_valid:
+            raise ValueError(error_msg)
+
         # Check if user with email already exists
         statement = select(User).where(User.email == user_register.email)
         existing_user = session.exec(statement).first()
@@ -88,7 +102,6 @@ class AuthService:
             username=user_register.username,
             email=user_register.email,
             hashed_password=hashed_password,
-            # The id, created_at, updated_at, and is_active fields will be set by the model defaults
         )
 
         # Add to session and commit

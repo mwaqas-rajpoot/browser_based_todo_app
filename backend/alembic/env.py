@@ -6,19 +6,22 @@ from sqlmodel import SQLModel
 import os
 import sys
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Add the backend/src directory to the Python path
 sys.path.append(str(Path(__file__).parent.parent / "src"))
 
 # Import your models
-from backend.src.models.user import User
-from backend.src.models.task import Task
+from models.user import User
+from models.task import Task
 
 # this is the Alembic Config object
 config = context.config
 
 # Interpret the config file for Python logging.
-# This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
@@ -26,7 +29,10 @@ if config.config_file_name is not None:
 target_metadata = SQLModel.metadata
 
 # Override the sqlalchemy.url with the DATABASE_URL from environment
-database_url = os.getenv("DATABASE_URL", "postgresql://user:password@localhost/todo_db")
+database_url = os.getenv("DATABASE_URL")
+if not database_url:
+    raise ValueError("DATABASE_URL environment variable is required")
+
 config.set_main_option("sqlalchemy.url", database_url)
 
 
