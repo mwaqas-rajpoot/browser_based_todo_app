@@ -7,23 +7,29 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
-# Database URL from environment variable (PostgreSQL only)
+# Database URL from environment variable
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable is required")
 
-if not DATABASE_URL.startswith("postgresql"):
-    raise ValueError("Only PostgreSQL databases are supported. DATABASE_URL must start with 'postgresql://'")
+# Create engine based on database type
+if DATABASE_URL.startswith("postgresql"):
+    # Production: PostgreSQL with connection pooling
+    engine = create_engine(
+        DATABASE_URL,
+        echo=False,
+        pool_pre_ping=True,
+        pool_size=5,
+        max_overflow=10
+    )
+elif DATABASE_URL.startswith("sqlite"):
+    # Local development: SQLite (for testing only)
+    print("⚠️  WARNING: Using SQLite for local development. Use PostgreSQL for production!")
+    engine = create_engine(DATABASE_URL, echo=False)
+else:
+    raise ValueError("DATABASE_URL must start with 'postgresql://' or 'sqlite:///'")
 
-# Create engine with PostgreSQL-specific settings
-engine = create_engine(
-    DATABASE_URL,
-    echo=False,
-    pool_pre_ping=True,
-    pool_size=5,
-    max_overflow=10
-)
 
 # Initialize database tables (for serverless environments)
 def init_db():
